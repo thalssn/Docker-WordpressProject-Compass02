@@ -1,7 +1,7 @@
 # Docker-WordpressProject-Compass02
 Este projeto demonstra a configuração da aplicação Wordpress conteinerizada via Docker. A arquitetura consiste em instâncias EC2 da AWS como host de serviço e ferramentas como Load Balancer e Auto Scalling auxiliando na segurança e integridade do serviço.
 
-![Minha Imagem](images/esquema.png)
+![Arquitetura](images/esquema.png)
 
 
 # Security Groups
@@ -229,6 +229,10 @@ Para criar as sub-redes, siga os seguintes passos, utilizando a opção **New su
 - Clique em **Subnet associations**.
 - Clique em **Edit subnet associations** e adicione as sub-redes privadas (por exemplo, **Private1** e **Private2**).
 - Clique em **Save** para confirmar as alterações.
+
+Se tudo deu certo o mapa da sua vpc deverá ser parecido a esse:
+
+![Arquitetura](images/vpc.png)
 
 # EFS
 
