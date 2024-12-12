@@ -46,3 +46,39 @@ echo "fs-094e853ccac82872b.efs.us-east-1.amazonaws.com:/ /efs nfs4 defaults,_net
 
 docker-compose up -d
 
+#Instalar CloudWatch Agent
+
+sudo apt-get update -y
+sudo apt-get install -y amazon-cloudwatch-agent
+
+# Criar configuração do CloudWatch Agent
+cat << EOF > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+{
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/var/log/apache2/access.log",
+            "log_group_name": "wordpress-access-logs",
+            "log_stream_name": "{instance_id}/access"
+          },
+          {
+            "file_path": "/var/log/apache2/error.log",
+            "log_group_name": "wordpress-error-logs",
+            "log_stream_name": "{instance_id}/error"
+          }
+        ]
+      }
+    }
+  }
+}
+EOF
+
+# Iniciar o CloudWatch Agent
+sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+-a fetch-config \
+-m ec2 \
+-c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json \
+-s
+
