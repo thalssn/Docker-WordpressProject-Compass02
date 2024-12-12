@@ -1,5 +1,5 @@
 # Docker-WordpressProject-Compass02
-Este projeto demonstra a configuração da aplicação Wordpress conteinerizada via Docker. A arquitetura consiste em instâncias EC2 da AWS como host de serviço e ferramentas como Load Balancer e Auto Scalling auxiliando na segurança e integridade do serviço.
+Este projeto demonstra a configuração da aplicação Wordpress conteinerizada via Docker. A arquitetura consiste em instâncias EC2 da AWS como host de serviço e ferramentas como Load Balancer e Auto Scaling auxiliando na segurança e integridade do serviço.
 
 ![Arquitetura](images/esquema.png)
 
@@ -550,6 +550,48 @@ ssh -i /caminho/para/sua/key.pem ubuntu@<IP_PUBLICO_BASTION>
 
 ```bash
 ssh -i /caminho/para/sua/key.pem ubuntu@<IP_PRIVADO_INSTANCIA_PRIVADA>
+```
+
+## Monitoramento com CloudWatch
+
+- Para fazer o monitoramento das instâncias por meio do CloudWatch é necessário a instalação e configuração do CloudWatch Agent em cada instância. Para isso iremos usar as seguinte linhas de comando que devem ser colocadas no script user_data.sh, dessa forma as novas maquinas iniciadas pelo auto scaling já traram o modulo de monitoramento instalado. Após isso as instâncias poderão ser monitoradas pelo console da AWS via CloudWatch.
+
+```bash
+#Instalar CloudWatch Agent
+
+sudo apt-get update -y
+sudo apt-get install -y amazon-cloudwatch-agent
+
+# Criar configuração do CloudWatch Agent
+cat << EOF > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+{
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/var/log/apache2/access.log",
+            "log_group_name": "wordpress-access-logs",
+            "log_stream_name": "{instance_id}/access"
+          },
+          {
+            "file_path": "/var/log/apache2/error.log",
+            "log_group_name": "wordpress-error-logs",
+            "log_stream_name": "{instance_id}/error"
+          }
+        ]
+      }
+    }
+  }
+}
+EOF
+
+# Iniciar o CloudWatch Agent
+sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
+-a fetch-config \
+-m ec2 \
+-c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json \
+-s
 ```
 
 
